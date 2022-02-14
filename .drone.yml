@@ -1,0 +1,17 @@
+kind: pipeline # 定義物件型別，還有secret和signature兩種型別
+type: docker # 定義流水線型別，還有kubernetes、exec、ssh等型別
+name: mall-tiny-drone # 定義流水線名稱
+
+steps: # 定義流水線執行步驟，這些步驟將順序執行
+  - name: package # 流水線名稱
+    image: maven:3-jdk-8 # 定義建立容器的Docker映象
+    volumes: # 將容器內目錄掛載到宿主機，倉庫需要開啟Trusted設定
+      - name: maven-cache
+        path: /root/.m2 # 將maven下載依賴的目錄掛載出來，防止重複下載
+      - name: maven-build
+        path: /app/build # 將應用打包好的Jar和執行指令碼掛載出來
+    commands: # 定義在Docker容器中執行的shell命令
+      - mvn clean package # 應用打包命令
+      - cp target/mall-tiny-drone-1.0-SNAPSHOT.jar /app/build/mall-tiny-drone-1.0-SNAPSHOT.jar
+      - cp Dockerfile /app/build/Dockerfile
+      - cp run.sh /app/build/run.sh
